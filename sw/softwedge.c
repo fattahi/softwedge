@@ -37,15 +37,16 @@ static Display *dpy;
 
 static void xtest_key_press(unsigned char letter)
 {
-	unsigned int shiftcode =
-	    XKeysymToKeycode(dpy, XStringToKeysym("Shift_L"));
 	int upper = 0;
 	int skip_lookup = 0;
 	char s[2];
+	KeyCode keycode;
+	unsigned int shiftcode;
+	KeySym sym = XStringToKeysym(s);
+	shiftcode = XKeysymToKeycode(dpy, XStringToKeysym("Shift_L"));
+
 	s[0] = letter;
 	s[1] = 0;
-	KeySym sym = XStringToKeysym(s);
-	KeyCode keycode;
 
 	if (sym == 0) {
 		sym = letter;
@@ -66,15 +67,18 @@ static void xtest_key_press(unsigned char letter)
 	}
 
 	if (!skip_lookup) {
-		// Here we try to determine if a keysym
-		// needs a modifier key (shift), such as a
-		// shifted letter or symbol.
-		// The second keysym should be the shifted char
+		/* 
+		 * Here we try to determine if a keysym
+		 * needs a modifier key (shift), such as a
+		 * shifted letter or symbol.
+		 * The second keysym should be the shifted char
+		 */
+		int i = 0;
 		KeySym *syms;
 		int keysyms_per_keycode;
-		syms =
-		    XGetKeyboardMapping(dpy, keycode, 1, &keysyms_per_keycode);
-		int i = 0;
+
+		syms = XGetKeyboardMapping(dpy, keycode, 1,
+					   &keysyms_per_keycode);
 		for (i = 0; i <= keysyms_per_keycode; i++) {
 			if (syms[i] == 0)
 				break;
@@ -117,7 +121,7 @@ int sw_open_serial(const char *port)
 
 void sw_init()
 {
-
+	Bool success;
 	int xtest_major_version = 0;
 	int xtest_minor_version = 0;
 	int dummy;
@@ -127,14 +131,14 @@ void sw_init()
 	 * the X server.  See Section 2.1.
 	 */
 	if ((dpy = XOpenDisplay(NULL)) == NULL) {
-		fprintf(stderr, "%s: can't open %s\en", "softwedge",
+		fprintf(stderr, "%s: can't open %s\n", "softwedge",
 			XDisplayName(NULL));
 		exit(1);
 	}
 
-	Bool success = XTestQueryExtension(dpy, &dummy, &dummy,
-					   &xtest_major_version,
-					   &xtest_minor_version);
+	success = XTestQueryExtension(dpy, &dummy, &dummy,
+				      &xtest_major_version,
+				      &xtest_minor_version);
 	if (success == False || xtest_major_version < 2
 	    || (xtest_major_version <= 2 && xtest_minor_version < 2)) {
 		fprintf(stderr,
@@ -146,7 +150,6 @@ void sw_init()
 
 void sw_read_loop()
 {
-
 	char readbuf[2];
 	readbuf[1] = 0;
 
@@ -155,6 +158,7 @@ void sw_read_loop()
 			continue;
 		press_keys(readbuf);
 	}
-	// We're done now
+
+	/* We're done now */
 	close(serialPort);
 }

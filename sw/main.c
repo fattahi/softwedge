@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <getopt.h>
 
 #include "softwedge.h"
 
@@ -87,7 +88,8 @@ int main(int argc, char **argv)
 		close(1);
 		close(2);
 	}
-	// Loop forever reading
+
+	/* Loop forever reading */
 	sw_read_loop();
 
 	return 0;
