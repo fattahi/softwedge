@@ -39,14 +39,14 @@ static void xtest_key_press(unsigned char letter)
 {
 	int upper = 0;
 	int skip_lookup = 0;
-	char s[2];
+	char s[2] = { 0 };
+	KeySym sym;
 	KeyCode keycode;
 	unsigned int shiftcode;
-	KeySym sym = XStringToKeysym(s);
-	shiftcode = XKeysymToKeycode(dpy, XStringToKeysym("Shift_L"));
 
 	s[0] = letter;
-	s[1] = 0;
+	sym = XStringToKeysym(s);
+	shiftcode = XKeysymToKeycode(dpy, XStringToKeysym("Shift_L"));
 
 	if (sym == 0) {
 		sym = letter;
@@ -86,6 +86,7 @@ static void xtest_key_press(unsigned char letter)
 			if (i == 0 && syms[i] != letter)
 				upper = 1;
 		}
+		XFree(syms);
 	}
 
 	if (upper)
@@ -150,8 +151,7 @@ void sw_init()
 
 void sw_read_loop()
 {
-	char readbuf[2];
-	readbuf[1] = 0;
+	char readbuf[2] = { 0 };
 
 	while (read(serialPort, readbuf, 1) > 0) {
 		if (readbuf[0] == 0x02 || readbuf[0] == 0x03)
