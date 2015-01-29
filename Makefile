@@ -16,4 +16,4 @@ install:
 	install softwedge $(DESTDIR)
 
 clean:
-	rm -f softwedge
+	rm -f softwedge sw/*.o sw/*.a
