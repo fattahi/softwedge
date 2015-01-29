@@ -30,64 +30,65 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-
 #include "softwedge.h"
 
-int main(int argc, char**argv)
+int main(int argc, char **argv)
 {
-  int c;
-  int dontDaemon = 0;
-  char *sport = NULL;
+	int c;
+	int dontDaemon = 0;
+	char *sport = NULL;
 
-  while ((c = getopt (argc, argv, "fvc:")) != -1)
-    switch (c)
-      {
-      case 'f':
-	fprintf(stderr, "softwedge not daemonizing...\n");
-	dontDaemon = 1;
-	break;
-      case 'v':
-	fprintf(stderr, "softwedge v %s: The serial softwedge X11 helper. ", SOFTWEDGE_VERSION);
-	fprintf(stderr, "(c) 2007 Yann Ramin <atrus@stackworks.net>\n(Exiting...)\n");
-	exit(0);
-      case 'c':
-	sport = optarg;
-	break;
-      case '?':
-	if (optopt == 'c')
-	  fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-	else if (isprint (optopt))
-	  fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-	else
-	  fprintf (stderr,
-		   "Unknown option character `\\x%x'.\n",
-		   optopt);
-	return 1;
-      default:
-	abort ();
-      }
+	while ((c = getopt(argc, argv, "fvc:")) != -1)
+		switch (c) {
+		case 'f':
+			fprintf(stderr, "softwedge not daemonizing...\n");
+			dontDaemon = 1;
+			break;
+		case 'v':
+			fprintf(stderr,
+				"softwedge v %s: The serial softwedge X11 helper. ",
+				SOFTWEDGE_VERSION);
+			fprintf(stderr,
+				"(c) 2007 Yann Ramin <atrus@stackworks.net>\n(Exiting...)\n");
+			exit(0);
+		case 'c':
+			sport = optarg;
+			break;
+		case '?':
+			if (optopt == 'c')
+				fprintf(stderr,
+					"Option -%c requires an argument.\n",
+					optopt);
+			else if (isprint(optopt))
+				fprintf(stderr, "Unknown option `-%c'.\n",
+					optopt);
+			else
+				fprintf(stderr,
+					"Unknown option character `\\x%x'.\n",
+					optopt);
+			return 1;
+		default:
+			abort();
+		}
 
-  if (sport == NULL)
-    sport = DEFAULT_SERIAL;
+	if (sport == NULL)
+		sport = DEFAULT_SERIAL;
 
-  sw_init();
+	sw_init();
 
-  sw_open_serial(sport);
+	sw_open_serial(sport);
 
+	if (!dontDaemon) {
+		if (fork()) {
+			return 0;
+		}
 
+		close(0);
+		close(1);
+		close(2);
+	}
+	// Loop forever reading
+	sw_read_loop();
 
-  if (!dontDaemon) {
-    if(fork()) {
-      return 0;
-    }
-    
-    close(0);
-    close(1);
-    close(2);
-  }
-
-  // Loop forever reading
-  sw_read_loop();
-
-  return 0;
+	return 0;
 }

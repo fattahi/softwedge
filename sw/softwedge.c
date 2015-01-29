@@ -30,14 +30,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-
 #include "softwedge.h"
 
 static int serialPort;
 static Display *dpy;
 
-static void xtest_key_press(unsigned char letter) {
-	unsigned int shiftcode = XKeysymToKeycode(dpy, XStringToKeysym("Shift_L"));
+static void xtest_key_press(unsigned char letter)
+{
+	unsigned int shiftcode =
+	    XKeysymToKeycode(dpy, XStringToKeysym("Shift_L"));
 	int upper = 0;
 	int skip_lookup = 0;
 	char s[2];
@@ -46,17 +47,13 @@ static void xtest_key_press(unsigned char letter) {
 	KeySym sym = XStringToKeysym(s);
 	KeyCode keycode;
 
-
-
 	if (sym == 0) {
 		sym = letter;
 	}
 
-
 	if (sym == '\n') {
 		sym = XK_Return;
 		skip_lookup = 1;
-
 	} else if (sym == '\t') {
 		sym = XK_Tab;
 		skip_lookup = 1;
@@ -66,7 +63,6 @@ static void xtest_key_press(unsigned char letter) {
 	if (keycode == 0) {
 		sym = 0xff00 | letter;
 		keycode = XKeysymToKeycode(dpy, sym);
-	
 	}
 
 	if (!skip_lookup) {
@@ -76,34 +72,30 @@ static void xtest_key_press(unsigned char letter) {
 		// The second keysym should be the shifted char
 		KeySym *syms;
 		int keysyms_per_keycode;
-		syms = XGetKeyboardMapping(dpy, keycode, 1, &keysyms_per_keycode);
+		syms =
+		    XGetKeyboardMapping(dpy, keycode, 1, &keysyms_per_keycode);
 		int i = 0;
 		for (i = 0; i <= keysyms_per_keycode; i++) {
 			if (syms[i] == 0)
 				break;
-	  
+
 			if (i == 0 && syms[i] != letter)
 				upper = 1;
-	  
-	  
 		}
 	}
 
 	if (upper)
-		XTestFakeKeyEvent(dpy, shiftcode, True, 0);	
+		XTestFakeKeyEvent(dpy, shiftcode, True, 0);
 
-  
-	XTestFakeKeyEvent(dpy, keycode, True, 0);	
+	XTestFakeKeyEvent(dpy, keycode, True, 0);
 	XTestFakeKeyEvent(dpy, keycode, False, 0);
 
 	if (upper)
-		XTestFakeKeyEvent(dpy, shiftcode, False, 0);	
-
-  
-
+		XTestFakeKeyEvent(dpy, shiftcode, False, 0);
 }
 
-static void press_keys(char* string) {
+static void press_keys(char *string)
+{
 	int len = strlen(string);
 	int i = 0;
 	for (i = 0; i < len; i++) {
@@ -112,8 +104,8 @@ static void press_keys(char* string) {
 	XFlush(dpy);
 }
 
-
-int sw_open_serial(const char *port) {
+int sw_open_serial(const char *port)
+{
 	serialPort = open(port, O_RDONLY);
 	if (serialPort < 0) {
 		fprintf(stderr, "Can't open serial port: %s\n", port);
@@ -123,41 +115,43 @@ int sw_open_serial(const char *port) {
 	return 0;
 }
 
-void sw_init() {
+void sw_init()
+{
 
 	int xtest_major_version = 0;
 	int xtest_minor_version = 0;
 	int dummy;
 
-  
 	/*
 	 * Open the display using the $DISPLAY environment variable to locate
 	 * the X server.  See Section 2.1.
 	 */
 	if ((dpy = XOpenDisplay(NULL)) == NULL) {
-		fprintf(stderr, "%s: can't open %s\en", "softwedge", XDisplayName(NULL));
+		fprintf(stderr, "%s: can't open %s\en", "softwedge",
+			XDisplayName(NULL));
 		exit(1);
 	}
-  
+
 	Bool success = XTestQueryExtension(dpy, &dummy, &dummy,
-									   &xtest_major_version, &xtest_minor_version);
-	if(success == False || xtest_major_version < 2 ||
-	   (xtest_major_version <= 2 && xtest_minor_version < 2))
-	{
-		fprintf(stderr,"XTEST extension not supported. Can't continue\n");
+					   &xtest_major_version,
+					   &xtest_minor_version);
+	if (success == False || xtest_major_version < 2
+	    || (xtest_major_version <= 2 && xtest_minor_version < 2)) {
+		fprintf(stderr,
+			"XTEST extension not supported. Can't continue\n");
 		exit(1);
 	}
 
 }
 
-
-void sw_read_loop() {
+void sw_read_loop()
+{
 
 	char readbuf[2];
 	readbuf[1] = 0;
 
-	while(read(serialPort, readbuf, 1) > 0) {
-		if (readbuf[0] == 0x02 || readbuf[0] == 0x03) 
+	while (read(serialPort, readbuf, 1) > 0) {
+		if (readbuf[0] == 0x02 || readbuf[0] == 0x03)
 			continue;
 		press_keys(readbuf);
 	}
