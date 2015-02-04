@@ -39,6 +39,9 @@ Options:
 -v:
 	See version information
 
+-h:
+	Help text
+
 
 Limitations:
 ------------

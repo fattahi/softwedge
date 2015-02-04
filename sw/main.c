@@ -33,19 +33,42 @@
 
 #include "softwedge.h"
 
+static void print_version()
+{
+	fprintf(stderr, "softwedge v %s: The serial softwedge X11 helper. ",
+		SOFTWEDGE_VERSION);
+	fprintf(stderr, "(c) 2007 Yann Ramin <atrus@stackworks.net>\n");
+}
+
+static void print_usage()
+{
+	print_version();
+	fprintf(stdout, "\nUsage: softwedge [options]\n\n");
+	fprintf(stdout, "Options:\n\n");
+	fprintf(stdout,
+		"\t-c <device>\tserial device used for input, default /dev/rfcomm0\n");
+	fprintf(stdout, "\t-f \t\trun in foreground, don't fork\n");
+	fprintf(stdout, "\t-v \t\tshows version information\n");
+	fprintf(stdout, "\t-h \t\tthis help text\n");
+}
+
 int main(int argc, char **argv)
 {
 	int c;
 	int dontDaemon = 0;
 	char *sport = NULL;
 
-	while ((c = getopt(argc, argv, "fvc:")) != -1)
+	while ((c = getopt(argc, argv, "hfvc:")) != -1)
 		switch (c) {
+		case 'h':
+			print_usage();
+			exit(0);
 		case 'f':
 			fprintf(stderr, "softwedge not daemonizing...\n");
 			dontDaemon = 1;
 			break;
 		case 'v':
+			print_version();
 			fprintf(stderr,
 				"softwedge v %s: The serial softwedge X11 helper. ",
 				SOFTWEDGE_VERSION);
