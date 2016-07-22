@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 
 
 #include "softwedge.h"
@@ -43,6 +44,7 @@ static void xtest_key_press(unsigned char letter) {
 	char s[2];
 	s[0] = letter;
 	s[1] = 0;
+	usleep(5000);
 	KeySym sym = XStringToKeysym(s);
 	KeyCode keycode;
 
